@@ -191,6 +191,10 @@ export default class Waypoint extends Plugin {
 		}
 	}
 
+	async getNoteRepresentation(note: TFile) {
+		return note.basename;
+	}
+
 	/**
 	 * Generate a file tree representation of the given folder.
 	 * @param rootNode The root of the file tree that will be generated
@@ -204,10 +208,17 @@ export default class Waypoint extends Plugin {
 		if (node instanceof TFile) {
 			// Print the file name
 			if (node.extension == "md") {
+				let noteRepresentation = await this.getNoteRepresentation(node);
+				// Development note: this seems to be something we would be able to
+				// extrac to a function. A `content` representation will be
+				// either
+				//  -  `${bullet} [[${content}]]`
+				//  -  `${bullet} [${content}](${this.getEncodedUri(rootNode, node)})`
+				// Depending if `this.settings.useWikiLinks` is set or not.
 				if (this.settings.useWikiLinks) {
-					return `${bullet} [[${node.basename}]]`;
+					return `${bullet} [[${noteRepresentation}]]`;
 				} else {
-					return `${bullet} [${node.basename}](${this.getEncodedUri(rootNode, node)})`;
+					return `${bullet} [${noteRepresentation}](${this.getEncodedUri(rootNode, node)})`;
 				}
 			} else if (this.settings.showNonMarkdownFiles) {
 				if (this.settings.useWikiLinks) {
@@ -231,10 +242,11 @@ export default class Waypoint extends Plugin {
 					}
 				}
 				if (folderNote instanceof TFile) {
+					let noteRepresentation = await this.getNoteRepresentation(folderNote);
 					if (this.settings.useWikiLinks) {
-						text = `${bullet} **[[${folderNote.basename}]]**`;
+						text = `${bullet} **[[${noteRepresentation}]]**`;
 					} else {
-						text = `${bullet} **[${folderNote.basename}](${this.getEncodedUri(rootNode, folderNote)})**`;
+						text = `${bullet} **[${noteRepresentation}](${this.getEncodedUri(rootNode, folderNote)})**`;
 					}
 					if (!topLevel) {
 						if (this.settings.stopScanAtFolderNotes) {
