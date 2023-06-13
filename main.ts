@@ -192,7 +192,15 @@ export default class Waypoint extends Plugin {
 	}
 
 	async getNoteRepresentation(note: TFile) {
-		return note.basename;
+		// Development notes:
+		// check if setting is ebabled for getting from metata, for now do it as default
+		let fileCache = this.app.metadataCache.getFileCache(note)
+		if (fileCache && fileCache.frontmatter && fileCache.frontmatter['title']) {
+			return fileCache.frontmatter.title
+		}
+		else {
+			return note.basename
+		};
 	}
 
 	/**
@@ -216,7 +224,7 @@ export default class Waypoint extends Plugin {
 				//  -  `${bullet} [${content}](${this.getEncodedUri(rootNode, node)})`
 				// Depending if `this.settings.useWikiLinks` is set or not.
 				if (this.settings.useWikiLinks) {
-					return `${bullet} [[${noteRepresentation}]]`;
+					return `${bullet} [[${node.basename}|${noteRepresentation}]]`;
 				} else {
 					return `${bullet} [${noteRepresentation}](${this.getEncodedUri(rootNode, node)})`;
 				}
@@ -244,7 +252,7 @@ export default class Waypoint extends Plugin {
 				if (folderNote instanceof TFile) {
 					let noteRepresentation = await this.getNoteRepresentation(folderNote);
 					if (this.settings.useWikiLinks) {
-						text = `${bullet} **[[${noteRepresentation}]]**`;
+						text = `${bullet} **[[${folderNote.basename}|${noteRepresentation}]]**`;
 					} else {
 						text = `${bullet} **[${noteRepresentation}](${this.getEncodedUri(rootNode, folderNote)})**`;
 					}
